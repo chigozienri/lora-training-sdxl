@@ -101,7 +101,6 @@ class Predictor(BasePredictor):
         #     description="Number of training steps to accumulate before a backward pass. Effective batch size = gradient_accumulation_steps * batch_size",
         #     default=1,
         # ), # todo.
-        ),
         unet_learning_rate: float = Input(
             description="Learning rate for the U-Net. We recommend this value to be somewhere between `1e-6` to `1e-5`.",
             default=1e-6,
