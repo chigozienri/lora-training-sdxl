@@ -1,19 +1,11 @@
 import contextlib
 import contextvars
 import threading
-from typing import (
-    Callable,
-    ContextManager,
-    NamedTuple,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import Callable, ContextManager, NamedTuple, Optional, TypeVar, Union
 
 import torch
 
 __all__ = ["no_init_or_tensor"]
-
 
 
 Model = TypeVar("Model")

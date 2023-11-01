@@ -1,9 +1,9 @@
-from collections import deque
 import hashlib
 import os
 import shutil
 import subprocess
 import time
+from collections import deque
 
 
 class WeightsDownloadCache:
