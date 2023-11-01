@@ -1,3 +1,4 @@
+import gc
 import hashlib
 import json
 import os
@@ -29,6 +30,7 @@ from safetensors import safe_open
 from safetensors.torch import load_file
 from transformers import CLIPImageProcessor
 
+from common import download_weights, get_output_filename
 from dataset_and_utils import TokenEmbeddingsHandler
 from preprocess import preprocess
 from trainer_pti import main
@@ -63,18 +65,10 @@ SCHEDULERS = {
 }
 
 
-def download_weights(url, dest):
-    start = time.time()
-    print("downloading url: ", url)
-    print("downloading to: ", dest)
-    subprocess.check_call(["pget", "-x", url, dest], close_fds=False)
-    print("downloading took: ", time.time() - start)
-
-
 class Predictor(BasePredictor):
     def predict(
         self,
-        input_images: Path = Input(
+        instance_data: Path = Input(
             description="A .zip or .tar file containing the image files that will be used for fine-tuning"
         ),
         seed: int = Input(
@@ -189,7 +183,7 @@ class Predictor(BasePredictor):
 
         input_dir = preprocess(
             input_images_filetype=input_images_filetype,
-            input_zip_path=input_images,
+            input_zip_path=instance_data,
             caption_text=caption_prefix,
             mask_target_prompts=mask_target_prompts,
             target_size=resolution,
@@ -232,4 +226,12 @@ class Predictor(BasePredictor):
             lora_rank=lora_rank,
             is_lora=True,
         )
-        return Path(f"{OUTPUT_DIR}/lora.safetensors")
+        print(os.listdir(OUTPUT_DIR))
+
+        gc.collect()
+        torch.cuda.empty_cache()
+
+        weights_path = Path(OUTPUT_DIR) / f"lora.safetensors"
+        output_path = Path(OUTPUT_DIR) / get_output_filename(instance_data)
+        weights_path.rename(output_path)
+        return output_path
